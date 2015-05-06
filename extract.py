@@ -6,16 +6,15 @@ from news_extractor.Extractor import Extractor, ExtractException
 
 class URL(object):
     """
-    Сохраняет информацию, прочитанную из командной строки
-    и свалидированную, в переменную context для передачи в
-    тело функции extract.
+    Store entered and validated information from command line
+    to variable 'context' to send to function 'extract'.
     """
     def __init__(self, context):
         self.context = context
 
 def validate_url(ctx, param, value):
     """
-    Функция для валидации введённого url'а. Возвращает экземпляр класса URL.
+    Function for validating input url. Returns instance of URL class.
     """
     try:
         return URL(request.urlopen(value).read())
@@ -27,7 +26,7 @@ def validate_url(ctx, param, value):
               help='File where information to extract.')
 @click.option('-u', '--url', prompt='Input URL', callback=validate_url, help='Url to extract information from.')
 def extract(url, output):
-    """Извлекает текст статьи по адресу url и записывает его в файл output."""
+    """Get article's body by url address and write it to output file."""
     click.echo("Start progress..")
     news = url.context
     e = Extractor(news)
@@ -35,7 +34,7 @@ def extract(url, output):
     try:
         news_text = e.get_news()
     except ExtractException as exception:
-        # чтобы не выводить трейсбек пользователю, просто пишем сообщение об ошибке
+        # we aren't showing traceback to user, just echoing error message
         return click.echo("Page parsing error: %s" % exception.args[0])
 
     with open(output, "w", encoding="utf-8") as out_file:

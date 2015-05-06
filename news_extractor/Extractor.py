@@ -3,29 +3,28 @@ import textwrap
 
 class ExtractException(Exception):
     """
-    Пользовательский класс исключения. Необходим для вывода ошибок,
-    вызванных в методах класса Extractor.
-    Наследует от базового класса.
+    Custom exception. Needs for errors raised in Extractor class methods.
+    Inherits from base Exception class.
     """
     pass
 
 class Extractor(BeautifulSoup):
     """
-    Наследует от класса BeautifulSoup одноимённого парсера, предназначенного
-    для максимально комфортного синтаксического разбора файлов HTML/XML.
+    Inherits from class BeautifulSoup of the same name parser
+    for the most convenient syntax parsing HTML/XML files.
     """
     # _header_tags = ("h1", "h2", "h3", "h4", "h5", "h6")
-    _header_tags = ("h1", "h2")  # ограничимся этими заголовками
+    _header_tags = ("h1", "h2")  # restrict by these headers
 
     def __init__(self, request, **kwargs):
-        _markup = "lxml"  # зададим парсер по-умолчанию
+        _markup = "lxml"  # set default parser
         super(Extractor, self).__init__(request, _markup, **kwargs)
 
     def _get_news_text(self, element):
         """
-        Возвращает форматированную строку с текстом статьи.
+        Returns formatted string with article's text.
 
-        element: Элемент страницы, из которого будет извлекаться текст.
+        element: Page's element to extract text from.
         """
 
         body = ""
@@ -35,13 +34,13 @@ class Extractor(BeautifulSoup):
             if (a_tag):
                 for a_item in a_tag:
                     text_url = "%s[%s]" % (a_item.string, a_item["href"])
-                    a_item.replace_with(text_url)  # заменяем <a href="h_text">Text</a> на Text[h_text]
+                    a_item.replace_with(text_url)  # replace <a href="h_text">Text</a> to Text[h_text]
             for script in ps_tag.find_all("script"):
-                script.decompose()  # удаляем лишние элементы script
+                script.decompose()  # delete unnecessary element script
             for s_tag in ps_tag.stripped_strings:
-                tag_text = textwrap.fill(  # упрощённый вариант textwrap.wrap()
-                    (UnicodeDammit(s_tag)).unicode_markup,  # создаём абзац из строк..
-                    80  # ..с максимальной длиной 80 символов каждая
+                tag_text = textwrap.fill(  # simple variant textwrap.wrap()
+                    (UnicodeDammit(s_tag)).unicode_markup,  # create paragraph from strings..
+                    80  # .. with maximum length 80 symbols each
                 ) + "\n"
                 body += tag_text
 
@@ -49,7 +48,7 @@ class Extractor(BeautifulSoup):
 
     def _get_article_body(self):
         """
-        Возвращает div элемент, содержащий текст статьи.
+        Returns div element contains text of article.
         """
 
         by_class = self.select('div[class*="text"]')
@@ -57,24 +56,24 @@ class Extractor(BeautifulSoup):
         if (by_class): element = by_class[0]
         elif (by_itemprop): element = by_itemprop[0]
         else:
-            raise ExtractException("Текст статьи не найден!")
+            raise ExtractException("Article's text hasn't been found!")
         return element
 
     def get_news(self):
         """
-        Возвращает строку с заголовками и текстом статьи.
+        Returns string with headers and text of article.
         """
         news_body = ""
-        # выбираем заголовки
+        # choose headers
         for header_tag in self._header_tags:
             if (self.find(header_tag)):
-                header = UnicodeDammit(  # задаём кодировку Unicode для строк
+                header = UnicodeDammit(  # set Unicode for strings
                     " ".join(self.find(header_tag).stripped_strings)
                 )
-                header.unicode_markup += "\n"  # отделяем заголовки друг от друга и от основного текста
+                header.unicode_markup += "\n"  # separate headers from each other and main body
                 news_body += header.unicode_markup
         news_body += "\n"
-        # выбираем основной текст
+        # choose main text
         ab = self._get_article_body()
         text_body = self._get_news_text(ab)
         news_body += text_body
