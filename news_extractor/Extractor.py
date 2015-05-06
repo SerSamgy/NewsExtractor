@@ -53,7 +53,12 @@ class Extractor(BeautifulSoup):
 
         by_class = self.select('div[class*="text"]')
         by_itemprop = self.select('div[itemprop="articleBody"]')
-        if (by_class): element = by_class[0]
+        if (by_class):
+            for item in by_class:  # iterate through found elements
+                p_children = item.find_all('p')
+                if(p_children):
+                    element = item
+                    break
         elif (by_itemprop): element = by_itemprop[0]
         else:
             raise ExtractException("Article's text hasn't been found!")
