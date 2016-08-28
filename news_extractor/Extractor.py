@@ -1,12 +1,14 @@
 from bs4 import BeautifulSoup, UnicodeDammit
 import textwrap
 
+
 class ExtractException(Exception):
     """
     Custom exception. Needs for errors raised in Extractor class methods.
     Inherits from base Exception class.
     """
     pass
+
 
 class Extractor(BeautifulSoup):
     """
@@ -59,7 +61,8 @@ class Extractor(BeautifulSoup):
                 if(p_children):
                     element = item
                     break
-        elif (by_itemprop): element = by_itemprop[0]
+        elif (by_itemprop):
+            element = by_itemprop[0]
         else:
             raise ExtractException("Article's text hasn't been found!")
         return element

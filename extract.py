@@ -12,6 +12,7 @@ class URL(object):
     def __init__(self, context):
         self.context = context
 
+
 def validate_url(ctx, param, value):
     """
     Function for validating input url. Returns instance of URL class.
@@ -20,6 +21,7 @@ def validate_url(ctx, param, value):
         return URL(request.urlopen(value).read())
     except ValueError:
         raise click.BadParameter('url need to be a correct URL string')
+
 
 @click.command()
 @click.option('-o', '--output', default="news.txt", type=click.Path(writable=True),
@@ -39,7 +41,8 @@ def extract(url, output):
 
     with open(output, "w", encoding="utf-8") as out_file:
         # print(news_text, file=out_file, flush=True)
-        with click.progressbar(news_text, length=len(news_text.encode()), label="Writing to file") as bar:
+        with click.progressbar(news_text, length=len(news_text.encode()),
+                               label="Writing to file") as bar:
             for item in bar:
                 print(item, end='', file=out_file, flush=True)
 
